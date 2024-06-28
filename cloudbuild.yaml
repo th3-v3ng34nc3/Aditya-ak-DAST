@@ -3,16 +3,8 @@ steps:
   - name: 'gcr.io/cloud-builders/git'
     args: ['clone', '--single-branch', '--branch', 'main', '${_REPO_URL}', 'app']
 
-  # Step 2: Set up environment
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "TARGET_URL=https://risasdental.com/"
-
-  # Step 3: Run OWASP ZAP scan
-  - name: 'owasp/zap2docker-stable'
+  # Step 2: Run OWASP ZAP scan
+  - name: 'owasp/zap2docker-weekly'
     entrypoint: 'zap-baseline.py'
     args:
       - '-t'
@@ -25,11 +17,11 @@ steps:
       - 'scanreport.json'
       - '-I'
 
-  # Step 4: List generated reports
+  # Step 3: List generated reports
   - name: 'gcr.io/cloud-builders/gsutil'
     args: ['ls', '-l', 'scanreport.*']
 
-  # Step 5: Upload ZAP Scan Report
+  # Step 4: Upload ZAP Scan Report
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
     args:
