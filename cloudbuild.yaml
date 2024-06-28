@@ -10,7 +10,7 @@ steps:
       - '-c'
       - |
         echo "_TARGET_URL=https://risasdental.com/" >> app/env.sh
-        sudo chmod -R 777 app
+        chmod -R 777 app
 
   # Step 3: Run OWASP ZAP baseline scan
   - name: 'gcr.io/cloud-builders/docker'
