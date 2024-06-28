@@ -3,13 +3,7 @@ steps:
   - name: 'gcr.io/cloud-builders/git'
     args: ['clone', '--single-branch', '--branch', 'main', '${_REPO_URL}', 'app']
 
-  # Step 2: Set up Docker Environment
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "_TARGET_URL=https://risasdental.com/" >> app/env.sh
+
 
   # Step 3: Run OWASP ZAP baseline scan
   - name: 'gcr.io/cloud-builders/docker'
