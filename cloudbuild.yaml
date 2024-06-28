@@ -2,8 +2,8 @@ steps:
   # Step 1: Checkout code
   - name: 'gcr.io/cloud-builders/git'
     args: ['clone', '--single-branch', '--branch', 'main', '${_REPO_URL}', 'app']
-
-  # Step 2: Run OWASP ZAP scan
+    
+  # Step 2: Run OWASP ZAP baseline scan
   - name: 'ghcr.io/zaproxy/zaproxy:stable'
     entrypoint: 'zap-baseline.py'
     args:
@@ -16,6 +16,9 @@ steps:
       - '-J'
       - 'scanreport.json'
       - '-I'  # Optional: Do not fail build on warnings
+    volumes:
+      - name: workdir
+        path: /zap/wrk  # Mount the /zap/wrk directory
 
   # Step 3: List generated reports
   - name: 'gcr.io/cloud-builders/gsutil'
@@ -42,3 +45,7 @@ substitutions:
 
 # Optional: Specify a Cloud Storage bucket for logs
 logsBucket: "gs://aditya-cicd-test"
+# Optional: Define volumes to mount
+volumes:
+  - name: workdir
+    path: /zap/wrk
