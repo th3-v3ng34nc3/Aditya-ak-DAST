@@ -23,7 +23,7 @@ steps:
           -w /zap/wrk \
           ghcr.io/zaproxy/zaproxy:stable \
           zap-baseline.py \
-          -t "${_TARGET_URL}" \
+          -t https://risasdental.com \
           -r scanreport.html \
           -x scanreport.xml \
           -J scanreport.json \
