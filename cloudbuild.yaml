@@ -9,7 +9,6 @@ steps:
     args:
       - '-c'
       - |
-        echo "_TARGET_URL=https://risasdental.com/" >> app/env.sh
         chmod -R 777 app
 
   # Step 3: Run OWASP ZAP baseline scan
