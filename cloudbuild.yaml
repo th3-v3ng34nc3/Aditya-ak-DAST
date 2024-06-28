@@ -2,9 +2,12 @@ steps:
   # Step 1: Checkout code
   - name: 'gcr.io/cloud-builders/git'
     args: ['clone', '--single-branch', '--branch', 'main', '${_REPO_URL}', 'app']
-    
-  # Step 1: Run OWASP ZAP baseline scan
-  - name: 'ghcr.io/zaproxy/zaproxy:stable'
+
+  # Step 2: Set up Docker Environment (if necessary)
+  # If additional setup is required, modify this step to prepare environment variables or configurations.
+
+  # Step 3: Run OWASP ZAP baseline scan
+  - name: 'ghcr.io/zaproxy/zaproxy'
     entrypoint: 'zap-baseline.py'
     args:
       - '-t'
@@ -17,13 +20,13 @@ steps:
       - 'scanreport.json'
       - '-I'  # Optional: Do not fail build on warnings
     env:
-      - 'TARGET_URL=https://risasdental.com/'
+      - 'TARGET_URL=${_TARGET_URL}'  # Pass TARGET_URL as an environment variable
 
-  # Step 3: List generated reports
+  # Step 4: List generated reports
   - name: 'gcr.io/cloud-builders/gsutil'
     args: ['ls', '-l', 'scanreport.*']
 
-  # Step 4: Upload ZAP Scan Report
+  # Step 5: Upload ZAP Scan Report
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
     args:
@@ -44,4 +47,3 @@ substitutions:
 
 # Optional: Specify a Cloud Storage bucket for logs
 logsBucket: "gs://aditya-cicd-test"
-
