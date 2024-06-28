@@ -1,0 +1,47 @@
+steps:
+  # Step 1: Checkout code
+  - name: 'gcr.io/cloud-builders/git'
+    args: ['clone', '--single-branch', '--branch', 'main', '<YOUR_GIT_REPO_URL>', 'app']
+
+  # Step 2: Set up environment
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "TARGET_URL=https://risasdental.com/" >> $DOCKER_ENV
+
+  # Step 3: Run OWASP ZAP scan
+  - name: 'owasp/zap2docker-stable'
+    entrypoint: 'zap-baseline.py'
+    args:
+      - '-t'
+      - '${_TARGET_URL}'
+      - '-r'
+      - 'scanreport.html'
+      - '-x'
+      - 'scanreport.xml'
+      - '-J'
+      - 'scanreport.json'
+      - '-I'
+
+  # Step 4: List generated reports
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['ls', '-l', 'scanreport.*']
+
+  # Step 5: Upload ZAP Scan Report (example using curl)
+  - name: 'gcr.io/cloud-builders/curl'
+    args:
+      - '--location'
+      - '--request'
+      - 'POST'
+      - 'https://cspm.demo.accuknox.com/api/v1/artifact/?tenant_id=167&data_type=ZAP&save_to_s3=false'
+      - '--header'
+      - 'Tenant-Id: 167'
+      - '--header'
+      - 'Authorization: Bearer <YOUR_API_TOKEN>'
+      - '--form'
+      - 'file=@\"scanreport.json\"'
+
+# Timeout setting for the entire build process
+timeout: 1200s  # Adjust timeout as per your application's build and testing requirements
