@@ -3,27 +3,16 @@ steps:
   - name: 'gcr.io/cloud-builders/git'
     args: ['clone', '--single-branch', '--branch', 'main', '${_REPO_URL}', 'app']
 
-  # Step 2: Set up Docker Environment
+  # Step 2: Set up Docker Environment and change permissions
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         echo "_TARGET_URL=https://risasdental.com/" >> app/env.sh
+        sudo chmod -R 777 app
 
-  # Step 3: Change permissions for OWASP ZAP directory
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        docker run --rm \
-          -v $(pwd)/app:/zap/wrk \
-          -w /zap/wrk \
-          ghcr.io/zaproxy/zaproxy:stable \
-          chmod -R 777 /zap/wrk
-
-  # Step 4: Run OWASP ZAP baseline scan
+  # Step 3: Run OWASP ZAP baseline scan
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
@@ -40,11 +29,11 @@ steps:
           -J scanreport.json \
           -I
 
-  # Step 5: List generated reports
+  # Step 4: List generated reports
   - name: 'gcr.io/cloud-builders/gsutil'
     args: ['ls', '-l', 'app/scanreport.*']
 
-  # Step 6: Upload ZAP Scan Report
+  # Step 5: Upload ZAP Scan Report
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
     args:
@@ -60,7 +49,7 @@ substitutions:
   _AK_URL: "cspm.demo.accuknox.com"
   _TENANT_ID: "167"
   _AK_TOK: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIwMzY4MTAwLCJqdGkiOiJhYzg0YjliYTgxNDE0NDk2YTQ2N2MyMDQzMzhhNmU5OCIsImlzcyI6ImNzcG0uZGVtby5hY2N1a25veC5jb20ifQ.OKrmduSHXWwH9t7edRnW4S--qccsZP-SY_8p97Z7Rvi-Rrn_OIGz0f8cJjuXXMkyAfKsEgviW5czxuBolz23oNUKZBlpYKoxe-ghMgMz3__-Zizw-izKii4WyFb3IcoLi0VMNh_HRxlxNN_-8DujXagFUQwgLTGmNz_zx_5aiMA1BFUnAYrjlrRL6q64_cJzPT6ip9I7tDDEWXgwJlVbtAlQvsqZxJVd39Lo4oK04Rwc5ehTz_lbw7_0VIgQkRCeiUhfKZj3OF4ie2sMfJm6BNtIP8wap_Nj-ORIRLyxeh84bBC7S_XTtgjkToEDJLSEd9BpLvLPcM8JqBSqx2Pa0Q"
-  _REPO_URL: "https://github.com/th3-v3ng34nc3/Aditya-ak-DAST" # Ensure this starts with http:// or https://
+  _REPO_URL: "https://github.com/th3-v3ng34nc3/Aditya-ak-DAST"  # Ensure this starts with http:// or https://
 
 # Optional: Specify a Cloud Storage bucket for logs
 logsBucket: "gs://aditya-cicd-test"
