@@ -28,10 +28,6 @@ steps:
           -J scanreport.json \
           -I
 
-  # Step 4: List generated reports
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['ls', '-l', 'gs://aditya-cicd-test/app/scanreport.*']
-
   # Step 5: Upload ZAP Scan Report
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
