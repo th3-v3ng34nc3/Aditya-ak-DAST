@@ -22,7 +22,7 @@ steps:
           -w /zap/wrk \
           ghcr.io/zaproxy/zaproxy:stable \
           zap-baseline.py \
-          -t $(TARGET_URL) \
+          -t $(_TARGET_URL) \
           -r scanreport.html \
           -x scanreport.xml \
           -J scanreport.json \
