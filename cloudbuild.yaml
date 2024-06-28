@@ -3,28 +3,34 @@ steps:
   - name: 'gcr.io/cloud-builders/git'
     args: ['clone', '--single-branch', '--branch', 'main', '${_REPO_URL}', 'app']
 
-  # Step 2: Set up Docker Environment (if necessary)
-  # If additional setup is required, modify this step to prepare environment variables or configurations.
+  # Step 2: Set up Docker Environment
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "TARGET_URL=https://risasdental.com/" >> app/env.sh
 
   # Step 3: Run OWASP ZAP baseline scan
-  - name: 'ghcr.io/zaproxy/zaproxy'
-    entrypoint: 'zap-baseline.py'
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
     args:
-      - '-t'
-      - '${_TARGET_URL}'
-      - '-r'
-      - 'scanreport.html'
-      - '-x'
-      - 'scanreport.xml'
-      - '-J'
-      - 'scanreport.json'
-      - '-I'  # Optional: Do not fail build on warnings
-    env:
-      - 'TARGET_URL=${_TARGET_URL}'  # Pass TARGET_URL as an environment variable
+      - '-c'
+      - |
+        docker run --rm \
+          -v $(pwd)/app:/zap/wrk \
+          -w /zap/wrk \
+          ghcr.io/zaproxy/zaproxy:stable \
+          zap-baseline.py \
+          -t ${TARGET_URL} \
+          -r scanreport.html \
+          -x scanreport.xml \
+          -J scanreport.json \
+          -I
 
   # Step 4: List generated reports
   - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['ls', '-l', 'scanreport.*']
+    args: ['ls', '-l', 'app/scanreport.*']
 
   # Step 5: Upload ZAP Scan Report
   - name: 'gcr.io/cloud-builders/curl'
@@ -35,7 +41,7 @@ steps:
         curl --location --request POST "https://${_AK_URL}/api/v1/artifact/?tenant_id=${_TENANT_ID}&data_type=SQ&save_to_s3=false" \
           --header "Tenant-Id: ${_TENANT_ID}" \
           --header "Authorization: Bearer ${_AK_TOK}" \
-          --form "file=@\"scanreport.json\""
+          --form "file=@\"app/scanreport.json\""
 
 # Substitutions for variables
 substitutions:
