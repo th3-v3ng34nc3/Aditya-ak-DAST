@@ -1,7 +1,7 @@
 steps:
   # Step 1: Checkout code
   - name: 'gcr.io/cloud-builders/git'
-    args: ['clone', '--single-branch', '--branch', 'main', '<YOUR_GIT_REPO_URL>', 'app']
+    args: ['clone', '--single-branch', '--branch', 'main', '${_REPO_URL}', 'app']
 
   # Step 2: Set up environment
   - name: 'gcr.io/cloud-builders/docker'
@@ -29,19 +29,23 @@ steps:
   - name: 'gcr.io/cloud-builders/gsutil'
     args: ['ls', '-l', 'scanreport.*']
 
-  # Step 5: Upload ZAP Scan Report (example using curl)
+  # Step 5: Upload ZAP Scan Report
   - name: 'gcr.io/cloud-builders/curl'
+    entrypoint: '/bin/sh'
     args:
-      - '--location'
-      - '--request'
-      - 'POST'
-      - 'https://cspm.demo.accuknox.com/api/v1/artifact/?tenant_id=167&data_type=ZAP&save_to_s3=false'
-      - '--header'
-      - 'Tenant-Id: 167'
-      - '--header'
-      - 'Authorization: Bearer <YOUR_API_TOKEN>'
-      - '--form'
-      - 'file=@\"scanreport.json\"'
+      - '-c'
+      - |
+        curl --location --request POST "https://${_AK_URL}/api/v1/artifact/?tenant_id=${_TENANT_ID}&data_type=SQ&save_to_s3=false" \
+          --header "Tenant-Id: ${_TENANT_ID}" \
+          --header "Authorization: Bearer ${_AK_TOK}" \
+          --form "file=@\"scanreport.json\""
 
-# Timeout setting for the entire build process
-timeout: 1200s  # Adjust timeout as per your application's build and testing requirements
+# Substitutions for variables
+substitutions:
+  _AK_URL: "cspm.demo.accuknox.com"
+  _TENANT_ID: "167"
+  _AK_TOK: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIwMzY4MTAwLCJqdGkiOiJhYzg0YjliYTgxNDE0NDk2YTQ2N2MyMDQzMzhhNmU5OCIsImlzcyI6ImNzcG0uZGVtby5hY2N1a25veC5jb20ifQ.OKrmduSHXWwH9t7edRnW4S--qccsZP-SY_8p97Z7Rvi-Rrn_OIGz0f8cJjuXXMkyAfKsEgviW5czxuBolz23oNUKZBlpYKoxe-ghMgMz3__-Zizw-izKii4WyFb3IcoLi0VMNh_HRxlxNN_-8DujXagFUQwgLTGmNz_zx_5aiMA1BFUnAYrjlrRL6q64_cJzPT6ip9I7tDDEWXgwJlVbtAlQvsqZxJVd39Lo4oK04Rwc5ehTz_lbw7_0VIgQkRCeiUhfKZj3OF4ie2sMfJm6BNtIP8wap_Nj-ORIRLyxeh84bBC7S_XTtgjkToEDJLSEd9BpLvLPcM8JqBSqx2Pa0Q"
+  _REPO_URL: "https://github.com/th3-v3ng34nc3/Aditya-ak-DAST"
+
+# Optional: Specify a Cloud Storage bucket for logs
+logsBucket: "gs://aditya-cicd-test"
