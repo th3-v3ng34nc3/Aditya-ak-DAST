@@ -15,7 +15,7 @@ steps:
       - 'scanreport.xml'
       - '-J'
       - 'scanreport.json'
-      - '-I'
+      - '-I'  # Optional: Do not fail build on warnings
 
   # Step 3: List generated reports
   - name: 'gcr.io/cloud-builders/gsutil'
