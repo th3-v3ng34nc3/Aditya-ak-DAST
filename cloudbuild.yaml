@@ -4,7 +4,7 @@ steps:
     args: ['clone', '--single-branch', '--branch', 'main', '${_REPO_URL}', 'app']
 
   # Step 2: Run OWASP ZAP scan
-  - name: 'owasp/zap2docker-weekly'
+  - name: 'ghcr.io/zaproxy/zaproxy:stable'
     entrypoint: 'zap-baseline.py'
     args:
       - '-t'
