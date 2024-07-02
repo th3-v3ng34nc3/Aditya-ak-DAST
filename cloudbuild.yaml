@@ -27,7 +27,12 @@ steps:
           -x scanreport.xml \
           -J scanreport.json \
           -I
-
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud secrets versions access latest --secret=accuknox_token --format='get(payload.data)' | tr '_-' '/+' | base64 -d > /workspace/decrypted-data.txt
   # Step 5: Upload ZAP Scan Report
   - name: 'gcr.io/cloud-builders/curl'
     entrypoint: '/bin/sh'
@@ -36,7 +41,7 @@ steps:
       - |
         curl --location --request POST "https://${_AK_URL}/api/v1/artifact/?tenant_id=${_TENANT_ID}&data_type=ZAP&save_to_s3=false" \
           --header "Tenant-Id: ${_TENANT_ID}" \
-          --header "Authorization: Bearer ${_AK_TOK}" \
+          --header "Authorization: Bearer $(cat /workspace/decrypted-data.txt)" \
           --form "file=@\"app/scanreport.json\""
 
 # Substitutions for variables
