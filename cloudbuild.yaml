@@ -22,7 +22,7 @@ steps:
           -w /zap/wrk \
           ghcr.io/zaproxy/zaproxy:stable \
           zap-baseline.py \
-          -t https://testhtml5.vulnweb.com/ \
+          -t http://testhtml5.vulnweb.com \
           -r scanreport.html \
           -x scanreport.xml \
           -J scanreport.json \
