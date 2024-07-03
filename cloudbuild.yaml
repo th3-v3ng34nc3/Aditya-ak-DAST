@@ -22,7 +22,7 @@ steps:
           -w /zap/wrk \
           ghcr.io/zaproxy/zaproxy:stable \
           zap-baseline.py \
-          -t https://risasdental.com \
+          -t https://testhtml5.vulnweb.com \
           -r scanreport.html \
           -x scanreport.xml \
           -J scanreport.json \
